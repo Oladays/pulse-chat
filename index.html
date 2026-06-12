@@ -1089,7 +1089,7 @@ messages</div> <!-- CONTINUATION OF PROFILE SECTION -->
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // ══════════════════════════════════════════
         // CONFIG — replace to go live
@@ -1114,21 +1114,118 @@ messages</div> <!-- CONTINUATION OF PROFILE SECTION -->
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        const toastTimeout;
+        let toastTimeout = null;
         function toast(msg) {
-            clearTimeout(toastTimeout);
+            if (toastTimeout) clearTimeout(toastTimeout);
             const t = $('toast');
-            t.textContent = msg;
-            t.classList.add('on');
-            toastTimeout = setTimeout(() => t.classList.remove('on'), 3000);
+            if (t) {
+                t.textContent = msg;
+                t.classList.add('on');
+                toastTimeout = setTimeout(() => t.classList.remove('on'), 3000);
+            }
         }
 
         // Simple mock authentication layout logic
         window.addEventListener('DOMContentLoaded', () => {
-            if (DEMO || !sbClient) {
-                toast("Running in offline demo mode.");
+            const phoneInput = $('phone-input');
+            const phoneBtn = $('phone-btn');
+            const phoneScreen = $('phone-screen');
+            const otpScreen = $('otp-screen');
+            const appScreen = $('app-screen');
+            const otpInput = $('otp-input');
+            const otpBtn = $('otp-btn');
+
+            if (phoneBtn) {
+                phoneBtn.addEventListener('click', async () => {
+                    const num = $v('phone-input');
+                    if (!num || num.length < 7) {
+                        toast('Please enter a valid phone number');
+                        return;
+                    }
+                    
+                    phoneBtn.disabled = true;
+                    phoneBtn.textContent = 'Sending...';
+
+                    if (DEMO) {
+                        toast('Demo Mode: Use OTP 123456');
+                        phoneScreen.style.display = 'none';
+                        otpScreen.style.display = 'block';
+                        phoneBtn.disabled = false;
+                        phoneBtn.textContent = 'Next';
+                        return;
+                    }
+
+                    try {
+                        const dialCode = $('country-select').value;
+                        const fullPhone = dialCode + num.replace(/^0+/, '');
+                        
+                        const { data, error } = await sbClient.auth.signInWithOtp({
+                            phone: fullPhone
+                        });
+
+                        if (error) throw error;
+
+                        toast('Verification code sent!');
+                        phoneScreen.style.display = 'none';
+                        otpScreen.style.display = 'block';
+                    } catch (err) {
+                        toast(err.message || 'Error sending SMS');
+                        console.error(err);
+                    } finally {
+                        phoneBtn.disabled = false;
+                        phoneBtn.textContent = 'Next';
+                    }
+                });
+            }
+
+            if (otpBtn) {
+                otpBtn.addEventListener('click', async () => {
+                    const code = $v('otp-input');
+                    if (code.length !== 6) {
+                        toast('Enter 6-digit code');
+                        return;
+                    }
+
+                    otpBtn.disabled = true;
+                    otpBtn.textContent = 'Verifying...';
+
+                    if (DEMO) {
+                        if (code === '123456') {
+                            otpScreen.style.display = 'none';
+                            appScreen.style.display = 'flex';
+                        } else {
+                            toast('Invalid code');
+                        }
+                        otpBtn.disabled = false;
+                        otpBtn.textContent = 'Verify & Proceed';
+                        return;
+                    }
+
+                    try {
+                        const dialCode = $('country-select').value;
+                        const num = $v('phone-input');
+                        const fullPhone = dialCode + num.replace(/^0+/, '');
+
+                        const { data, error } = await sbClient.auth.verifyOtp({
+                            phone: fullPhone,
+                            token: code,
+                            type: 'sms'
+                        });
+
+                        if (error) throw error;
+
+                        toast('Signed in successfully!');
+                        otpScreen.style.display = 'none';
+                        appScreen.style.display = 'flex';
+                    } catch (err) {
+                        toast(err.message || 'Verification failed');
+                    } finally {
+                        otpBtn.disabled = false;
+                        otpBtn.textContent = 'Verify & Proceed';
+                    }
+                });
             }
         });
-    </script>
+        </script>
 </body>
 </html>
