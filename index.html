@@ -1088,15 +1088,49 @@ messages</div> <!-- CONTINUATION OF PROFILE SECTION -->
             </div>
         </div>
     </div>
+            <div id="otp-screen" class="auth-card" style="display: none;">
+            <div class="logo-row">
+                <div class="logo-icon">💬</div>
+                <div class="logo-text">Pulse<span>Chat</span></div>
+            </div>
+            
+            <h1 class="auth-title">Verify your number</h1>
+            <p class="auth-sub">Enter the 6-digit code to proceed.</p>
+            
+            <div style="margin: 24px 0;">
+                <input type="text" id="otp-input" placeholder="000000" maxlength="6" style="letter-spacing: 8px; text-align: center; font-size: 24px; font-weight: 700; width: 100%; padding: 12px; background: var(--panel2); border: 1px solid var(--panel2); border-radius: 8px; color: var(--txt);">
+            </div>
+
+            <button id="otp-btn" class="auth-btn">Verify & Proceed</button>
+        </div>
+
 
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+             <!-- OTP VERIFICATION SCREEN -->
+        <div id="otp-screen" class="auth-card" style="display: none;">
+            <div class="logo-row">
+                <div class="logo-icon">💬</div>
+                <div class="logo-text">Pulse<span>Chat</span></div>
+            </div>
+            
+            <h1 class="auth-title">Verify your number</h1>
+            <p class="auth-sub">Enter the 6-digit code to proceed.</p>
+            
+            <div style="margin: 24px 0;">
+                <input type="text" id="otp-input" placeholder="000000" maxlength="6" style="letter-spacing: 8px; text-align: center; font-size: 24px; font-weight: 700; width: 100%; padding: 12px; background: var(--panel2); border: 1px solid var(--panel2); border-radius: 8px; color: var(--txt);">
+            </div>
+
+            <button id="otp-btn" class="auth-btn">Verify & Proceed</button>
+        </div>
+
         // ══════════════════════════════════════════
         // CONFIG — replace to go live
         // ══════════════════════════════════════════
         const SUPABASE_URL = 'https://czqgttncafcnpdhvxkqo.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_Qv8a8RlMmHnSIGTyGAsl3Q_Kw5wxBCg';
-        const DEMO = false;
+        const DEMO = true;
+
 
         let sbClient;
         if (!DEMO && typeof supabase !== 'undefined') {
